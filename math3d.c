@@ -55,6 +55,8 @@ void hoverattitude_calculate(pod_coords_t* podcoords, laser_readings_t* readings
 		}
 	}
 
+	result->center_height = -ground.z / ground.c;
+
 	vect1.x = 1; vect1.y = 0; vect1.z = 0;
 	result->roll = acos((double)((vec1.x*plane.a + vec1.y*plane.b + vec1.z*plane.c) / sqrt((double)(plane.a*plane.a + plane.b*plane.b + plane.c*plane.c))))*(180.0/M_PI);
 
