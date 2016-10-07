@@ -1,0 +1,18 @@
+#ifndef _RPOD_H_
+#define _RPOD_H_
+
+#include <stdint.h>
+
+typedef enum
+{
+	RPODSTATE_INIT,
+	RPODSTATE_RECAL,
+	RPODSTATE_CHARGING,
+	RPODSTATE_HOVERING_STILL,
+	RPODSTATE_HOVERING,
+	RPODSTATE_BRAKING_NORMAL,
+	RPODSTATE_BRAKING_EMERGENCY,
+}
+rpod_state_t;
+
+#endif
