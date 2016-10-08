@@ -10,21 +10,20 @@ typedef uint16_t rpod_chksum_t;
 
 typedef struct
 {
-	float p;
-	float i;
-	float d;
-	float i_decay;
-	float out_min;
-	float out_max;
+	point3d_t position;
+	bool can_gimbal;
 }
-pid_consts_t;
+engine_const_t;
 
 typedef struct
 {
-	float integral;
-	float prev_error;
+	int id;
+	engine_const_t* consts;
+	pid_data_t pid_state;
+	float throttle;
+	void (*updateDac)(void*);
 }
-pid_data_t;
+engine_t;
 
 typedef struct
 {
@@ -36,15 +35,14 @@ typedef struct
 }
 stepper_const_t;
 
-
-typedef
+typedef struct
 {
 	int id;
 	stepper_const_t* consts;
-	int position;
-	int target;
+	float target;
 	void (*moveRelative)(void*, int);
 	void (*moveAbsolute)(void*, int);
+	void (*moveTowards)(void*);
 	char (*isMinHit)(void*);
 	char (*isMaxHit)(void*);
 	uint16_t (*getAdc)(void*);

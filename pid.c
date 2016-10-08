@@ -10,18 +10,21 @@ float pid_calc(pid_const_t* consts, pid_data_t* state, float curr, float tgt)
 {
 	float x, e, i, d;
 
-	e = tgt - curr;
-	i = state->integral;
-	i += e;
-	d = e - state->prev_error;
+	e = tgt - curr; // calculate current error;
+	i = state->integral + e; // accumulate new error into sum
+	d = e - state->prev_error; // derivative term
 
+	// simple PID equation
 	x  = e * consts->p;
 	x += i * consts->i;
 	x += d * consts->d;
 
-	state->integral -= consts->i_decay;
-	state->integral += e;
+	state->integral  *= consts->i_decay; // this prevents infinitely accumulating error, i_decay must be less than 1 but greater than or equal to zero
+	state->integral   = i;
 	state->prev_error = e;
 
-	return x < consts->out_max ? (x > consts->out_min ? x : consts->out_min) : consts->out_max;
+	// constrain output to limits
+	x = x < consts->out_max ? (x > consts->out_min ? x : consts->out_min) : consts->out_max;
+
+	return x;
 }
