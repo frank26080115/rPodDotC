@@ -6,7 +6,7 @@ void hoverattitude_calculate(pod_coords_t* podcoords, laser_readings_t* readings
 {
 	plane_t ground;
 	point3d_t vec1, vec2, cxprod;
-	rpod_float_t d;
+	float d;
 	int i;
 
 	// calculate two vectors in the plane
@@ -46,7 +46,7 @@ void hoverattitude_calculate(pod_coords_t* podcoords, laser_readings_t* readings
 	result->min_height = 9999999;
 	for (i = 0; i < 4; i++)
 	{
-		rpod_float_t tmp;
+		float tmp;
 		point3d_t* corner = &podcoords->corner_pos[i];
 		// calculate distance from a point to a plane
 		tmp = result->corner_height[i] = (ground.a*corner->x + ground.b*corner->y + ground.c*corner->z + ground.d) / sqrt((double)(ground.a*ground.a + ground.b*ground.b + ground.c*ground.c));

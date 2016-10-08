@@ -5,35 +5,35 @@
 
 typedef struct
 {
-	rpod_float_t a;
-	rpod_float_t b;
-	rpod_float_t c;
-	rpod_float_t d;
+	float a;
+	float b;
+	float c;
+	float d;
 }
 plane_t;
 
 typedef struct
 {
-	rpod_float_t x;
-	rpod_float_t y;
+	float x;
+	float y;
 }
 point2d_t;
 
 typedef struct
 {
-	rpod_float_t x;
-	rpod_float_t y;
-	rpod_float_t z;
+	float x;
+	float y;
+	float z;
 }
 point3d_t;
 
 typedef struct
 {
-	rpod_float_t roll;
-	rpod_float_t pitch;
-	rpod_float_t center_height;
-	rpod_float_t min_height;
-	rpod_float_t corner_height[4];
+	float roll;
+	float pitch;
+	float center_height;
+	float min_height;
+	float corner_height[4];
 }
 attitude_t;
 

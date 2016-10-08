@@ -1,4 +1,4 @@
-char stepper_calibrate_all(stepper_t* steppers[], int count)
+char stepper_calibrate_all_full(stepper_t* steppers[], int count)
 {
 	stepper_t* stepper;
 	int i;
