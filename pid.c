@@ -19,8 +19,8 @@ float pid_calc(pid_const_t* consts, pid_data_t* state, float curr, float tgt)
 	x += i * consts->i;
 	x += d * consts->d;
 
-	state->integral  *= consts->i_decay; // this prevents infinitely accumulating error, i_decay must be less than 1 but greater than or equal to zero
-	state->integral   = i;
+	state->integral   = i * consts->i_decay;
+	state->integral   = state->integral < consts->i_max ? (state->integral > consts->i_min ? state->integral : consts->i_min) : consts->i_max;
 	state->prev_error = e;
 
 	// constrain output to limits

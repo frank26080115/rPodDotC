@@ -9,8 +9,10 @@ typedef struct
 	float i;
 	float d;
 	float i_decay;
-	float out_min;
 	float out_max;
+	float out_min;
+	float i_max;
+	float i_min;
 }
 pid_consts_t;
 
