@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_MODBUS_ADDRESS 1
-
 // TODO: Lachlan to implement low level drivers
 extern void modbus_hal_tx(uint8_t* buff, uint8_t len);
 extern uint8_t modbus_hal_avail(void);
@@ -31,20 +29,20 @@ void ModRTU_Send(uint8_t addr, uint8_t func, uint8_t* buf, uint8_t n)
 	modbus_hal_tx(modbus_buff, 2 + n + 2);
 }
 
-void ModRTU_RequestParam(uint16_t param, uint16_t len)
+void ModRTU_RequestParam(uint8_t dev, uint16_t param, uint16_t len)
 {
 	read_holding_reg_t packet;
 	BIGENDIAN16(param, packet.param_h, packet.param_l);
 	BIGENDIAN16(len, packet.regcnt_h, packet.regcnt_l);
-	ModRTU_Send(DEFAULT_MODBUS_ADDRESS, ModBusFunc_Read_Holding_Registers, (uint8_t*)&packet, sizeof(read_holding_reg_t));
+	ModRTU_Send(dev, ModBusFunc_Read_Holding_Registers, (uint8_t*)&packet, sizeof(read_holding_reg_t));
 }
 
-void ModRTF_PresetParam(uint16_t param, uint16_t value)
+void ModRTF_PresetParam(uint8_t dev, uint16_t param, uint16_t value)
 {
 	single_reg_t packet;
 	BIGENDIAN16(param, packet.param_h, packet.param_l);
 	BIGENDIAN16(value, packet.val_h, packet.val_l);
-	ModRTU_Send(DEFAULT_MODBUS_ADDRESS, ModBusFunc_Preset_Single_Register, (uint8_t*)&packet, sizeof(preset_single_reg_t));
+	ModRTU_Send(dev, ModBusFunc_Preset_Single_Register, (uint8_t*)&packet, sizeof(preset_single_reg_t));
 }
 
 uint16_t ModRTU_CRC(uint8_t *buf, int len)
@@ -67,21 +65,22 @@ uint16_t ModRTU_CRC(uint8_t *buf, int len)
   return crc;
 }
 
-modbus_rx_res_t modbus_parse(uint8_t* buff, uint8_t len, uint16_t* result)
+modbus_rx_res_t modbus_parse(uint8_t dev, uint8_t* buff, uint8_t len, uint16_t* result)
 {
 	//uint16_t crc_calc;
 	//uint16_t* crc_got;
 
 	uint16_t data;
 
-	if (len <= 4) {
+	if (len <= 4) { // total length incorrect
 		return MODBUS_RX_ERROR;
 	}
 
-	if (buff[0] != ASI_DEVICE_ADDR) {
-		return MODBUS_RX_NONE;
+	if (buff[0] != dev) { // destination
+		return MODBUS_RX_NONE; // could be something else on the bus talking, it's not exactly an error, so we return none
 	}
-	if (buff[1] != ModBusFunc_Read_Holding_Registers) {
+
+	if (buff[1] != ModBusFunc_Read_Holding_Registers) { // command func
 		return MODBUS_RX_ERROR;
 	}
 
@@ -97,15 +96,16 @@ modbus_rx_res_t modbus_parse(uint8_t* buff, uint8_t len, uint16_t* result)
 		return MODBUS_RX_ERROR;
 	}
 
+	// pack according to format
 	data = buff[3];
 	data <<= 8;
 	data += buff[4];
 
-	*result = data;
-	return MODBUS_RX_DATA;
+	*result = data; // return data
+	return MODBUS_RX_DATA; // return status
 }
 
-modbus_rx_res_t Modbus_RxTask(uint16_t* result)
+modbus_rx_res_t Modbus_RxTask(uint8_t dev, uint16_t* result)
 {
 	static systmr_t last_time;
 	systmr_t now;
@@ -129,7 +129,7 @@ modbus_rx_res_t Modbus_RxTask(uint16_t* result)
 		// parse if packet seems large enough
 		// note: hardcoded number is bad but enough for the rPod
 		if (buff_idx >= 7) {
-			char r = modbus_parse(buff, buff_idx, result);
+			char r = modbus_parse(dev, buff, buff_idx, result);
 			buff_idx = 0;
 			return r;
 		}
@@ -140,7 +140,7 @@ modbus_rx_res_t Modbus_RxTask(uint16_t* result)
 		// note: shouldn't actually logically happen here
 		// note: hardcoded number is bad but enough for the rPod
 		if (buff_idx >= 7) {
-			char r = modbus_parse(buff, buff_idx, result);
+			char r = modbus_parse(dev, buff, buff_idx, result);
 			buff_idx = 0;
 			return r;
 		}
